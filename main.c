@@ -248,7 +248,7 @@ static void license(void) {
 		   "\nOption to allow server side upsampling for PCM streams (-W) from\n"
 		   "squeezelite-R2 (c) Marco Curti 2015, marcoc1712@gmail.com.\n"
 #if RPI
-		   "\nContains pigpio GPIO Interface library <http://abyz.me.uk/rpi/pigpio/>.\n"
+		   "\nContains minimal GPIO Interface <http://abyz.me.uk/rpi/pigpio/>.\n"
 #endif
 #if FFMPEG
 		   "\nThis software uses libraries from the FFmpeg project under\n"
@@ -268,12 +268,6 @@ static void license(void) {
 
 static void sighandler(int signum) {
 	slimproto_stop();
-
-#ifdef GPIO
-#ifdef RPI
-	gpioShutdown();
-#endif
-#endif
 
 	// remove ourselves in case above does not work, second SIGINT will cause non gracefull shutdown
 	signal(signum, SIG_DFL);
