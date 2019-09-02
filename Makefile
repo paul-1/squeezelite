@@ -35,7 +35,7 @@ SOURCES_SSL      = sslsym.c
 SOURCES_OPUS     = opus.c
 
 LINK_LINUX       = -ldl
-LINK_RPI         = -lwiringPi
+LINK_RPI         = -lpigpio
 LINK_SSL         = -lssl -lcrypto
 LINK_ALAC        = -lalac
 

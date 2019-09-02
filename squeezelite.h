@@ -751,6 +751,9 @@ struct codec *register_opus(void);
 #if GPIO
 void relay( int state);
 void relay_script(int state);
+#if RPI
+void gpioShutdown();
+#endif
 int gpio_pin;
 bool gpio_active_low;
 bool gpio_active;
