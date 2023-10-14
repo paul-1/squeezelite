@@ -25,34 +25,62 @@
 #if GPIO
 
 #include "squeezelite.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+#if RPI
+#include <lgpio.h>
+
+#endif  // RPI
+
 static int gpio_state = -1;
-static int initialized = -1;
+static bool initialized = false;
 static int power_state = -1;
+static int chip = -1;
+
+bool gpio_init(){
+	// Set up gpio using kernel interface
+	if (! initialized){
+		chip = lgGpiochipOpen(gpio_chip);
+
+		if ( chip >= 0 ){
+			if (lgGpioClaimOutput(chip, LINEFLAGS, gpio_pin, 0) == LG_OKAY) {
+				initialized = true;
+			} else {
+				LOG_ERROR("Unable to open GPIO:%d for output", gpio_pin);
+			}
+		} else {
+			LOG_ERROR("Unable to open gpio chip:%d", gpio_chip);
+		}
+	}
+	return initialized;
+}
+
+void gpio_close(){
+	if (initialized && chip >= 0){
+		lgGpiochipClose(chip);
+	}
+}
 
 void relay( int state) {
 #ifdef RPI
     gpio_state = state;
+    int status;
 
-  // Set up gpio  using BCM Pin #'s
-	if (initialized == -1){
-		if ( gpioInitialise() == 0 ){
-			initialized = 1;
-		}
-	}
-	if ( initialized == 1){
-		gpioSetMode (gpio_pin, PI_OUTPUT);
-	}
+	if (initialized){
+		if(gpio_state == 1)
+			status = lgGpioWrite(chip, gpio_pin, LG_HIGH^gpio_active_low);
+		else if(gpio_state == 0)
+			status = lgGpioWrite(chip, gpio_pin, LG_LOW^gpio_active_low);
 
-	if(gpio_state == 1)
-		gpioWrite(gpio_pin, PI_HIGH^gpio_active_low);
-	else if(gpio_state == 0)
-		gpioWrite(gpio_pin, PI_LOW^gpio_active_low);
+		if (status != 0)
+			LOG_ERROR("Unable to write to GPIO Pin:%d, Error Code:%d", gpio_pin, status);
+	}
   // Done!
 #endif
+
 }
 
 char *cmdline;
